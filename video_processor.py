@@ -235,8 +235,10 @@ class VideoProcessor:
 def main():
     import sys
     import time
+    from datetime import datetime, timedelta
 
-    start_time = time.time()  # Start time countdown
+    start_time = time.time()
+    start_datetime = datetime.now()
 
     if len(sys.argv) > 1:
         video_path = sys.argv[1]
@@ -256,8 +258,9 @@ def main():
     print(f"Codec: {video_info['codec']}")
     print(f"File size: {video_info['file_size_mb']:.2f} MB")
 
-    # Frame extraction with adjusted parameters for 4K video
-    print("\nStarting frame extraction with quality check...")
+    print(f"\nStart time: {start_datetime.strftime('%H:%M:%S')}")
+
+    # Frame extraction
     frames_saved, quality_summary = processor.extract_frames(
         frame_interval=30,
         blur_threshold=5,
@@ -265,23 +268,30 @@ def main():
         quality=95
     )
 
-    print(f"\nQuality Check Summary:")
+    # Time calculations
+    end_time = time.time()
+    execution_time = end_time - start_time
+    end_datetime = datetime.now()
+
+    frames_per_second = quality_summary['total_frames_checked'] / execution_time
+    processing_time_per_frame = execution_time / quality_summary['total_frames_checked'] if quality_summary[
+                                                                                                'total_frames_checked'] > 0 else 0
+
+    print(f"\nPerformance Summary:")
+    print(f"Start time: {start_datetime.strftime('%H:%M:%S')}")
+    print(f"End time: {end_datetime.strftime('%H:%M:%S')}")
+    print(f"Total execution time: {int(execution_time // 60)} minutes {execution_time % 60:.1f} seconds")
+    print(f"Average processing speed: {frames_per_second:.1f} frames/second")
+    print(f"Average time per frame: {processing_time_per_frame:.2f} seconds")
+
+    print(f"\nExtraction Results:")
     print(f"Total frames checked: {quality_summary['total_frames_checked']}")
     print(f"Good quality frames: {quality_summary['good_quality_frames']}")
     print(f"Poor quality frames: {quality_summary['poor_quality_frames']}")
-    if quality_summary['total_frames_checked'] > 0:
-        print(
-            f"Quality ratio: {quality_summary['good_quality_frames'] / quality_summary['total_frames_checked'] * 100:.1f}%")
-    print(f"\nSuccessfully saved {frames_saved} frames")
+    print(
+        f"Quality ratio: {quality_summary['good_quality_frames'] / quality_summary['total_frames_checked'] * 100:.1f}%")
+    print(f"Successfully saved {frames_saved} frames")
     print(f"Frames saved in directory: {processor.output_dir}")
-
-    # total runtime
-    end_time = time.time()
-    execution_time = end_time - start_time
-    minutes = int(execution_time // 60)
-    seconds = execution_time % 60
-
-    print(f"\nTotal execution time: {minutes} minutes {seconds:.1f} seconds")
 
 
 if __name__ == "__main__":
