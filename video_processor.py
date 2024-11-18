@@ -1,4 +1,7 @@
 # video_processor.py
+# pip install -r requirements.txt
+# to run
+# python video_processor.py IMG_0553.MOV
 
 import cv2
 import numpy as np
